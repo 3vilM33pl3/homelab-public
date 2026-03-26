@@ -1,0 +1,6 @@
+---
+- name: Install MinIO on monolith
+  hosts: gpu_nodes
+  vars:
+    minio_server_url: "https://objects.metatao.net"
+    minio_data_dir: "/media/bunnychow/minio"

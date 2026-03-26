@@ -1,31 +1,57 @@
 services:
   reverse-proxy:
-    image: caddy:2
+    image: caddy:2.8.4
+    restart: unless-stopped
     ports:
       - "80:80"
       - "443:443"
     volumes:
       - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./caddy/roots.example.pem:/etc/caddy/roots.pem:ro
       - caddy_data:/data
       - caddy_config:/config
+    networks:
+      - ingress
+      - internal
+    healthcheck:
+      test: ["CMD", "caddy", "validate", "--config", "/etc/caddy/Caddyfile"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.102.0
+    restart: unless-stopped
     command: ["--config=/etc/otelcol/config.yaml"]
     ports:
       - "4317:4317"
       - "4318:4318"
-
-  object-storage:
-    image: minio/minio:latest
-    command: server /data --console-address ":9001"
-    ports:
-      - "9000:9000"
-      - "9001:9001"
     volumes:
-      - object_storage:/data
+      - ./otel-collector-config.yaml:/etc/otelcol/config.yaml:ro
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "/otelcol-contrib", "--config=/etc/otelcol/config.yaml", "--dry-run"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  mtls-test:
+    image: hashicorp/http-echo:1.0.0
+    restart: unless-stopped
+    command: ["-listen=:18080", "-text=mtls-test-ok"]
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:18080"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  ingress:
+  internal:
 
 volumes:
   caddy_data:
   caddy_config:
-  object_storage:

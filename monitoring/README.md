@@ -1,23 +1,24 @@
 # Monitoring and Ingress Patterns
 
-The private homelab uses a single edge host for ingress, telemetry collection, and a few infrastructure-facing services. This public version keeps the pattern without publishing the real endpoints.
+This directory is a runnable example for ingress, telemetry ingestion, and client-certificate enforcement. Object storage is managed separately by the MinIO Ansible example so the monitoring example can stay self-contained.
 
-## Preserved Ideas
+## What This Example Demonstrates
 
-- a reverse proxy terminates internal TLS using certificates from the private CA
-- telemetry receivers stay reachable on stable internal ports
-- storage and monitoring have explicit host paths and retention settings
-- mTLS is used to protect especially sensitive internal surfaces
+- a reverse proxy that trusts an internal CA endpoint
+- an OpenTelemetry collector with an explicit mounted config
+- a dedicated mTLS test service behind client-certificate auth
+- pinned image versions, restart policies, and health checks
 
-## Included Examples
+## Validation Flow
 
-- `compose.yml`: minimal observability stack shape
-- `caddy/Caddyfile`: internal ingress, ACME against the private CA, and an mTLS-protected endpoint
+```bash
+docker compose -f compose.yml config
+docker compose -f compose.yml up -d
+docker compose -f compose.yml ps
+```
 
-## Example Ports
+## Required Local Inputs
 
-- OTLP gRPC: `4317`
-- OTLP HTTP: `4318`
-- object storage API: `9000`
-- object storage console: `9001`
-- mTLS test endpoint: `18080`
+- replace `caddy/roots.example.pem` with the trust bundle used for client certificate validation
+- ensure the CA endpoint configured in `caddy/Caddyfile` is reachable from the edge host
+- keep telemetry and mTLS endpoints on the private side of the network boundary

@@ -34,5 +34,13 @@
     { "pattern": "\\bHarbor\\b", "replacement": "Registry" },
     { "pattern": "\\bharbor-registry\\b", "replacement": "registry-trust" },
     { "pattern": "\\bharbor\\b", "replacement": "registry" }
+  ],
+  "forbidden_patterns": [
+    "metatao\\.net",
+    "10\\.22\\.6\\.",
+    "\\bolivier\\b",
+    "\\bmonolith\\b",
+    "\\bbunnychow\\b",
+    "QNAP|Synology|Turris|Deco|BE85|XE200"
   ]
 }

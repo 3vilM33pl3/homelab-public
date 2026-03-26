@@ -1,0 +1,24 @@
+{
+  "file_mappings": [
+    {
+      "src": "iac_ansible/inventory-homelab.ini",
+      "dest": "generated/inventory.ini"
+    },
+    {
+      "src": "iac_ansible/install-minio.yml",
+      "dest": "generated/install-minio.yml"
+    }
+  ],
+  "replacements": [
+    { "pattern": "\\bolivier\\b", "replacement": "operator" },
+    { "pattern": "metatao\\.net", "replacement": "lab.example" },
+    { "pattern": "\\bmonolith\\b", "replacement": "edge-1" },
+    { "pattern": "\\bbunnychow\\b", "replacement": "shared-storage" }
+  ],
+  "forbidden_patterns": [
+    "metatao\\.net",
+    "\\bolivier\\b",
+    "\\bmonolith\\b",
+    "\\bbunnychow\\b"
+  ]
+}

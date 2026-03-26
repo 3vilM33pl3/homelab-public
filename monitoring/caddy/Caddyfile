@@ -2,9 +2,8 @@
 	acme_ca https://ca.lab.example/acme/acme/directory
 }
 
-objects.lab.example {
-	reverse_proxy object-storage:9000
-}
+# The internal CA trust bundle must be mounted at /etc/caddy/roots.pem.
+# If the CA is unavailable, certificate issuance and mTLS validation will fail closed.
 
 telemetry.lab.example {
 	reverse_proxy otel-collector:4318

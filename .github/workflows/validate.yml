@@ -1,0 +1,47 @@
+name: validate
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: "1.8.8"
+
+      - name: Install Ansible
+        run: pip install ansible
+
+      - name: Run export tool tests
+        run: python -m unittest discover -s tests -p 'test_*.py'
+
+      - name: Run public repo denylist scan
+        run: |
+          python tools/export-public-homelab.py --source tests/fixtures/private-homelab --dest "$RUNNER_TEMP/public" --rules tests/fixtures/rules-pass.json --scan-only
+          python tools/check-public-tree.py
+
+      - name: Syntax check Ansible playbooks
+        run: |
+          ansible-playbook -i iac_ansible/inventory.example.ini iac_ansible/install-edge.yml --syntax-check
+          ansible-playbook -i iac_ansible/inventory.example.ini iac_ansible/install-baremetal.yml --syntax-check
+          ansible-playbook -i iac_ansible/inventory.example.ini iac_ansible/install-kubernetes.yml --syntax-check
+          ansible-playbook -i iac_ansible/inventory.example.ini iac_ansible/install-minio.yml --syntax-check
+
+      - name: Validate OpenTofu examples
+        run: |
+          tofu -chdir=iac_terraform init -backend=false
+          tofu -chdir=iac_terraform fmt -check
+          tofu -chdir=iac_terraform validate
+
+      - name: Validate monitoring compose config
+        run: docker compose -f monitoring/compose.yml config

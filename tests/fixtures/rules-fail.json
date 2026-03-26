@@ -1,0 +1,13 @@
+{
+  "file_mappings": [
+    {
+      "src": "iac_ansible/install-minio.yml",
+      "dest": "generated/install-minio.yml"
+    }
+  ],
+  "replacements": [],
+  "forbidden_patterns": [
+    "metatao\\.net",
+    "\\bbunnychow\\b"
+  ]
+}
