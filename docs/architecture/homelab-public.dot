@@ -1,0 +1,46 @@
+digraph homelab_public {
+  graph [rankdir=LR, bgcolor="white", fontname="Helvetica"];
+  node [shape=box, style="rounded,filled", fontname="Helvetica", fillcolor="#f7f7f7", color="#555555"];
+  edge [color="#666666", arrowsize=0.8];
+
+  internet [label="Internet / Remote Clients", fillcolor="#f1f5f9"];
+  router [label="Router / Firewall\nDNS + DHCP", fillcolor="#dbeafe"];
+  vpn [label="WireGuard Access\nAdmin entry path", fillcolor="#dbeafe"];
+  ca [label="CA Host\nStep CA + trust distribution", fillcolor="#e0f2fe"];
+  edgehost [label="Edge Services Host\nIngress + object storage + telemetry", fillcolor="#e0f2fe"];
+
+  subgraph cluster_k8s {
+    label="Kubernetes Cluster";
+    color="#cbd5e1";
+    style="rounded,dashed";
+    control [label="control-1\ncontrol plane", fillcolor="#fee2e2"];
+    worker1 [label="worker-1\nworker", fillcolor="#fee2e2"];
+    worker2 [label="worker-2\nworker", fillcolor="#fee2e2"];
+    worker3 [label="worker-3\nworker", fillcolor="#fee2e2"];
+    workloads [label="Internal workloads\nPVC-backed apps + services", fillcolor="#fef3c7"];
+  }
+
+  backup [label="NAS / Backup Target", fillcolor="#dcfce7"];
+
+  internet -> router;
+  internet -> vpn;
+  vpn -> edgehost [label="admin access"];
+  router -> ca;
+  router -> edgehost;
+  router -> control;
+  router -> worker1;
+  router -> worker2;
+  router -> worker3;
+  ca -> edgehost [label="ACME + trust root"];
+  ca -> control [label="CA trust"];
+  ca -> worker1 [label="CA trust"];
+  ca -> worker2 [label="CA trust"];
+  ca -> worker3 [label="CA trust"];
+  control -> workloads;
+  worker1 -> workloads;
+  worker2 -> workloads;
+  worker3 -> workloads;
+  edgehost -> workloads [label="ingress + telemetry"];
+  edgehost -> backup [label="snapshots / backups"];
+  workloads -> backup [label="stateful data"];
+}
