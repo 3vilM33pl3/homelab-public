@@ -1,0 +1,29 @@
+---
+- name: Install common base packages
+  ansible.builtin.package:
+    name:
+      - curl
+      - vim
+      - htop
+      - jq
+      - ca-certificates
+    state: present
+
+- name: Ensure system trust store directory exists
+  ansible.builtin.file:
+    path: "{{ trusted_ca_root_path | dirname }}"
+    state: directory
+    mode: "0755"
+
+- name: Install internal CA root certificate placeholder
+  ansible.builtin.copy:
+    content: |
+      -----BEGIN CERTIFICATE-----
+      PUBLIC-EXAMPLE-ONLY
+      -----END CERTIFICATE-----
+    dest: "{{ trusted_ca_root_path }}"
+    mode: "0644"
+
+- name: Refresh trust store
+  ansible.builtin.command: update-ca-certificates
+  changed_when: true

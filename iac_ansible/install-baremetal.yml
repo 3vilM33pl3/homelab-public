@@ -1,0 +1,20 @@
+---
+- name: Prepare cluster and edge nodes
+  hosts: baremetal:gpu_nodes
+  become: yes
+  vars:
+    trusted_ca_root_path: /usr/local/share/ca-certificates/lab-root-ca.crt
+    trusted_registry_host: registry.lab.example
+    install_container_runtime: "{{ inventory_hostname in groups['baremetal'] }}"
+  vars_prompt:
+    - name: ca_provisioner_password
+      prompt: "Step CA provisioner password (optional for bootstrap-only tasks)"
+      private: yes
+      default: ""
+  tasks:
+    - import_tasks: tasks/base-host.yml
+      tags: [base, security]
+
+    - import_tasks: tasks/kubernetes-node.yml
+      when: install_container_runtime
+      tags: [kubernetes, containerd]

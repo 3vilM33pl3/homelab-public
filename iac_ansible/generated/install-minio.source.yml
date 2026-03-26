@@ -1,0 +1,37 @@
+---
+- name: Install MinIO on edge-1 for OpenTofu state
+  hosts: gpu_nodes
+  become: yes
+  vars:
+    minio_version: "latest"
+    minio_data_dir: "/media/shared-storage/minio"
+    minio_required_mount: "/media/shared-storage"
+    minio_api_port: 9000
+    minio_console_port: 9001
+    minio_bucket: "homelab-tfstate"
+    minio_tf_policy_name: "terraform-state"
+    minio_server_url: "https://objects.lab.example"
+    minio_browser_redirect_url: "https://objects.lab.example/console/"
+  vars_prompt:
+    - name: minio_root_user
+      prompt: "MinIO root user"
+      private: no
+      default: "minioadmin"
+    - name: minio_root_password
+      prompt: "MinIO root password"
+      private: yes
+      default: ""
+    - name: minio_tf_access_key
+      prompt: "OpenTofu state access key (leave blank to skip user creation)"
+      private: no
+      default: ""
+    - name: minio_tf_secret_key
+      prompt: "OpenTofu state secret key (leave blank to skip user creation)"
+      private: yes
+      default: ""
+  tasks:
+    - import_tasks: tasks/shared-storage-mount-task.yml
+      tags: [storage, shared-storage, cifs]
+
+    - import_tasks: tasks/minio-task.yml
+      tags: [storage, minio]

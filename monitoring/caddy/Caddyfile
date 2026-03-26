@@ -1,0 +1,22 @@
+{
+	acme_ca https://ca.lab.example/acme/acme/directory
+}
+
+objects.lab.example {
+	reverse_proxy object-storage:9000
+}
+
+telemetry.lab.example {
+	reverse_proxy otel-collector:4318
+}
+
+mtls.lab.example {
+	tls {
+		client_auth {
+			mode require_and_verify
+			trust_pool file /etc/caddy/roots.pem
+		}
+	}
+
+	reverse_proxy http://mtls-test:18080
+}

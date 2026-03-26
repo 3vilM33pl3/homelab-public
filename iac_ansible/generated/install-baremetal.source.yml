@@ -1,0 +1,63 @@
+- name: Install basic software on baremetal servers
+  hosts: baremetal
+  become: yes
+  vars_prompt:
+    - name: step_provisioner_password
+      prompt: "Enter step-ca provisioner password (for SSH certificate generation, press Enter to skip)"
+      private: yes
+      default: ""
+  handlers:
+    - name: restart ssh
+      systemd:
+        name: ssh
+        state: restarted
+    - name: restart containerd
+      systemd:
+        name: containerd
+        state: restarted
+  tasks:
+  - name: Set hostname
+    hostname:
+      name: "{{ inventory_hostname }}.lab.example"
+    tags: [config, hostname]
+
+  - name: Set timezone to UTC
+    timezone:
+      name: UTC
+    tags: [config, timezone]
+
+  - import_tasks: tasks/apt-upgrade-tasks.yml
+    tags: [system, apt]
+
+  - import_tasks: tasks/vim-task.yml
+    tags: [tools, editor]
+
+  - import_tasks: tasks/tools-task.yml
+    tags: [tools, system-tools]
+
+  - import_tasks: tasks/ntp-task.yml
+    tags: [system, ntp]
+
+  - import_tasks: tasks/step-cli-task.yml
+    tags: [security, step-cli]
+
+  - import_tasks: tasks/rust-task.yml
+    tags: [dev, rust]
+
+  - import_tasks: tasks/rust-cargo-task.yml
+    tags: [dev, rust, cargo]
+
+  - import_tasks: tasks/i2c-task.yml
+    tags: [hardware, i2c]
+
+  - import_tasks: tasks/info-display-task.yml
+    tags: [hardware, display]
+
+  - import_tasks: tasks/ssh-cert-task.yml
+    tags: [security, ssh, certificates]
+
+  - import_tasks: tasks/registry-trust-trust-task.yml
+    tags: [security, registry-trust, containerd, registry]
+
+  - import_tasks: tasks/longhorn-storage-task.yml
+    tags: [storage, longhorn]

@@ -1,36 +1,38 @@
 {
   "file_mappings": [
-    { "src": "README.md", "dest": "README.md" },
-    { "src": "docs/README.md", "dest": "docs/README.md" },
-    { "src": "docs/security/secrets.md", "dest": "docs/security/secrets.md" },
-    { "src": "iac_ansible/README.md", "dest": "iac_ansible/README.md" },
-    { "src": "iac_ansible/install-baremetal.yml", "dest": "iac_ansible/install-baremetal.yml" },
-    { "src": "iac_ansible/install-kubernetes.yml", "dest": "iac_ansible/install-kubernetes.yml" },
-    { "src": "iac_ansible/install-minio.yml", "dest": "iac_ansible/install-minio.yml" },
-    { "src": "iac_ansible/inventory-homelab.ini", "dest": "iac_ansible/inventory.example.ini" },
-    { "src": "iac_ansible/ca/README.md", "dest": "iac_ansible/ca/README.md" },
-    { "src": "iac_terraform/README.md", "dest": "iac_terraform/README.md" },
-    { "src": "monitoring/README.md", "dest": "monitoring/README.md" }
+    {
+      "src": "iac_ansible/install-baremetal.yml",
+      "dest": "iac_ansible/generated/install-baremetal.source.yml"
+    },
+    {
+      "src": "iac_ansible/install-kubernetes.yml",
+      "dest": "iac_ansible/generated/install-kubernetes.source.yml"
+    },
+    {
+      "src": "iac_ansible/install-minio.yml",
+      "dest": "iac_ansible/generated/install-minio.source.yml"
+    },
+    {
+      "src": "iac_ansible/inventory-homelab.ini",
+      "dest": "iac_ansible/generated/inventory.source.ini"
+    }
   ],
   "replacements": [
-    { "pattern": "Olivier Van Acker", "replacement": "lab operator" },
     { "pattern": "\\bolivier\\b", "replacement": "operator" },
     { "pattern": "metatao\\.net", "replacement": "lab.example" },
     { "pattern": "10\\.22\\.6\\.\\d+", "replacement": "<lan-ip>" },
     { "pattern": "10\\.14\\.0\\.1/24", "replacement": "<vpn-overlay-cidr>" },
     { "pattern": "10\\.8\\.0\\.0/24", "replacement": "<vpn-client-cidr>" },
+    { "pattern": "(?m)^ca(?=\\s)", "replacement": "ca-1" },
     { "pattern": "\\bmonolith\\b", "replacement": "edge-1" },
     { "pattern": "\\bwhite\\b", "replacement": "control-1" },
     { "pattern": "\\borange\\b", "replacement": "worker-1" },
     { "pattern": "\\bpink\\b", "replacement": "worker-2" },
     { "pattern": "\\bblue\\b", "replacement": "worker-3" },
     { "pattern": "\\bzero\\b", "replacement": "aux-1" },
-    { "pattern": "\\bForgejo\\b", "replacement": "internal Git service" },
-    { "pattern": "\\bforgejo\\b", "replacement": "git-service" },
-    { "pattern": "\\bRecipes\\b", "replacement": "internal app" },
-    { "pattern": "\\brecipes\\b", "replacement": "internal-app" },
-    { "pattern": "\\brandom-web\\b", "replacement": "utility-web" },
-    { "pattern": "\\bOpenBao\\b", "replacement": "secret store" },
-    { "pattern": "\\bopenbao\\b", "replacement": "secret-store" }
+    { "pattern": "\\bbunnychow\\b", "replacement": "shared-storage" },
+    { "pattern": "\\bHarbor\\b", "replacement": "Registry" },
+    { "pattern": "\\bharbor-registry\\b", "replacement": "registry-trust" },
+    { "pattern": "\\bharbor\\b", "replacement": "registry" }
   ]
 }

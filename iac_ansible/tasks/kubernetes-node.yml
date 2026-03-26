@@ -1,0 +1,28 @@
+---
+- name: Disable swap for kubelet stability
+  ansible.builtin.command: swapoff -a
+  when: disable_swap | default(true)
+  changed_when: true
+
+- name: Ensure container runtime config directory exists
+  ansible.builtin.file:
+    path: /etc/containerd/certs.d/{{ trusted_registry_host }}
+    state: directory
+    mode: "0755"
+
+- name: Write container registry trust hints
+  ansible.builtin.copy:
+    content: |
+      server = "https://{{ trusted_registry_host }}"
+      [host."https://{{ trusted_registry_host }}"]
+        capabilities = ["pull", "resolve"]
+        ca = "/etc/containerd/certs.d/{{ trusted_registry_host }}/ca.crt"
+    dest: /etc/containerd/certs.d/{{ trusted_registry_host }}/hosts.toml
+    mode: "0644"
+
+- name: Record kubelet cgroup driver choice
+  ansible.builtin.copy:
+    content: |
+      KUBELET_EXTRA_ARGS=--cgroup-driver={{ kubelet_cgroup_driver | default("systemd") }}
+    dest: /etc/default/kubelet
+    mode: "0644"

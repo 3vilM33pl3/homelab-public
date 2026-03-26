@@ -1,0 +1,19 @@
+---
+- name: Ensure MinIO data directory exists
+  ansible.builtin.file:
+    path: "{{ minio_data_dir }}"
+    state: directory
+    mode: "0750"
+
+- name: Write MinIO environment file
+  ansible.builtin.template:
+    src: templates/minio.env.j2
+    dest: /etc/default/minio
+    mode: "0600"
+
+- name: Describe MinIO deployment intent
+  ansible.builtin.debug:
+    msg:
+      - "MinIO API listens on {{ minio_api_port }}"
+      - "MinIO console listens on {{ minio_console_port }}"
+      - "Object storage root path: {{ minio_data_dir }}"

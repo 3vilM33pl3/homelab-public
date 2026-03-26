@@ -1,0 +1,11 @@
+---
+- name: Prepare Kubernetes-specific prerequisites
+  hosts: baremetal
+  become: yes
+  vars:
+    kubelet_cgroup_driver: systemd
+    disable_swap: true
+    trusted_registry_host: registry.lab.example
+  tasks:
+    - import_tasks: tasks/kubernetes-node.yml
+      tags: [kubernetes, kubelet, containerd]
