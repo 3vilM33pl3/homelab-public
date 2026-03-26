@@ -1,0 +1,8 @@
+---
+disable_swap: true
+kubelet_cgroup_driver: systemd
+kubernetes_packages:
+  - containerd
+  - kubelet
+  - kubeadm
+  - kubectl

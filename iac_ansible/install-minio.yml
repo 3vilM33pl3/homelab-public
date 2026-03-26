@@ -1,17 +1,7 @@
 ---
-- name: Install MinIO on edge-1 for OpenTofu state
-  hosts: gpu_nodes
+- name: Install MinIO on edge hosts for OpenTofu state
+  hosts: edge_hosts
   become: yes
-  vars:
-    minio_version: "latest"
-    minio_data_dir: "/srv/object-storage/minio"
-    minio_required_mount: "/srv/object-storage"
-    minio_api_port: 9000
-    minio_console_port: 9001
-    minio_bucket: "homelab-state"
-    minio_tf_policy_name: "state-access"
-    minio_server_url: "https://objects.lab.example"
-    minio_browser_redirect_url: "https://objects.lab.example/console/"
   vars_prompt:
     - name: minio_root_user
       prompt: "MinIO root user"
@@ -29,6 +19,30 @@
       prompt: "OpenTofu state secret key (leave blank to skip user creation)"
       private: yes
       default: ""
+  handlers:
+    - name: restart minio
+      ansible.builtin.systemd:
+        name: minio
+        state: restarted
+        enabled: true
+        daemon_reload: true
+  pre_tasks:
+    - name: Assert MinIO bootstrap prerequisites
+      ansible.builtin.assert:
+        that:
+          - ansible_os_family in supported_os_families
+          - ansible_mounts | selectattr("mount", "equalto", minio_required_mount) | list | length > 0
+        fail_msg: "The required MinIO mount is missing from ansible_mounts."
+
+    - name: Capture MinIO mount facts
+      ansible.builtin.set_fact:
+        minio_mount_fact: "{{ (ansible_mounts | selectattr('mount', 'equalto', minio_required_mount) | list)[0] }}"
+
+    - name: Assert minimum free space for object storage
+      ansible.builtin.assert:
+        that:
+          - (minio_mount_fact.size_available / 1024 / 1024) | int >= minio_required_free_mb
+        fail_msg: "The required MinIO mount does not have enough free space."
   tasks:
     - import_tasks: tasks/minio.yml
       tags: [storage, minio]

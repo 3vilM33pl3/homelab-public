@@ -1,0 +1,10 @@
+---
+ansible_user: operator
+trusted_ca_root_path: /usr/local/share/ca-certificates/lab-root-ca.crt
+trusted_ca_placeholder_pem: |
+  -----BEGIN CERTIFICATE-----
+  PUBLIC-EXAMPLE-ONLY
+  -----END CERTIFICATE-----
+trusted_registry_host: registry.lab.example
+supported_os_families:
+  - Debian

@@ -2,10 +2,27 @@
 - name: Prepare Kubernetes-specific prerequisites
   hosts: baremetal
   become: yes
-  vars:
-    kubelet_cgroup_driver: systemd
-    disable_swap: true
-    trusted_registry_host: registry.lab.example
+  handlers:
+    - name: restart containerd
+      ansible.builtin.systemd:
+        name: containerd
+        state: restarted
+        enabled: true
+        daemon_reload: true
+
+    - name: restart kubelet
+      ansible.builtin.systemd:
+        name: kubelet
+        state: restarted
+        enabled: true
+        daemon_reload: true
+  pre_tasks:
+    - name: Assert supported platform and init system
+      ansible.builtin.assert:
+        that:
+          - ansible_os_family in supported_os_families
+          - ansible_service_mgr == "systemd"
+        fail_msg: "This Kubernetes bootstrap example supports Debian-family systemd hosts only."
   tasks:
     - import_tasks: tasks/kubernetes-node.yml
       tags: [kubernetes, kubelet, containerd]

@@ -1,19 +1,28 @@
 # Documentation Index
 
-This public documentation stays focused on architecture and operating principles.
+This public documentation focuses on trust boundaries, operating assumptions, and the controls that back up the repo’s claims.
 
 ## Start Here
 
-- `../README.md`: scope of the public repo
-- `architecture/homelab-public.dot`: architecture source
-- `security/secrets.md`: secret-handling model
+- `../README.md`: scope, rebuild flow, and validation checklist
+- `security/threat-model.md`: assumptions, trust boundaries, and operator model
+- `security/secrets.md`: secret-handling, state sensitivity, and publication controls
 - `../iac_ansible/README.md`: host automation patterns
 - `../iac_terraform/README.md`: cluster resource patterns
-- `../monitoring/README.md`: observability and ingress patterns
+- `../monitoring/README.md`: monitoring and ingress example
 
-## Design Principles
+## Principle To Control Mapping
 
-- network location is not enough to earn trust
-- private PKI is part of routine operations
-- secrets are encrypted or injected, not embedded in code
-- public examples explain the system without exposing the real topology
+| Principle | Enforced by |
+| --- | --- |
+| Network location is not enough to earn trust | WireGuard admin path, mTLS example, explicit trust-boundary docs |
+| Private PKI is part of routine operations | CA host model, trust-root distribution in Ansible, Caddy internal ACME example |
+| Secrets are encrypted or injected, not embedded | `docs/security/secrets.md`, Terraform secret reference pattern, export denylist scan |
+| Public examples must not leak private topology | `tools/export-public-homelab.py`, denylist scan, fixture tests, manual review gate |
+
+## Trust Boundaries
+
+- Remote operator to edge host: authenticated over WireGuard, then authorized per service.
+- Edge host to internal services: TLS terminates explicitly, not implicitly through network location.
+- CA host to managed nodes: trust-root distribution is deliberate and auditable.
+- Public repo to private source of truth: one-way export plus denylist enforcement; no reverse sync.

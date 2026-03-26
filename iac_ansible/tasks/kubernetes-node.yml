@@ -1,14 +1,37 @@
 ---
-- name: Disable swap for kubelet stability
+- name: Install Kubernetes node packages
+  ansible.builtin.package:
+    name: "{{ kubernetes_packages }}"
+    state: present
+
+- name: Capture active swap devices
+  ansible.builtin.command: swapon --summary --noheadings
+  register: active_swap
+  changed_when: false
+
+- name: Disable active swap at runtime when present
   ansible.builtin.command: swapoff -a
-  when: disable_swap | default(true)
+  when: disable_swap | default(true) and active_swap.stdout | trim != ""
   changed_when: true
 
-- name: Ensure container runtime config directory exists
+- name: Comment swap entries in fstab
+  ansible.builtin.replace:
+    path: /etc/fstab
+    regexp: '^(?!#)(.+\s+swap\s+.+)$'
+    replace: '# \1'
+
+- name: Ensure container runtime trust directory exists
   ansible.builtin.file:
     path: /etc/containerd/certs.d/{{ trusted_registry_host }}
     state: directory
     mode: "0755"
+
+- name: Install registry CA placeholder for containerd
+  ansible.builtin.copy:
+    content: "{{ trusted_ca_placeholder_pem }}"
+    dest: /etc/containerd/certs.d/{{ trusted_registry_host }}/ca.crt
+    mode: "0644"
+  notify: restart containerd
 
 - name: Write container registry trust hints
   ansible.builtin.copy:
@@ -19,10 +42,35 @@
         ca = "/etc/containerd/certs.d/{{ trusted_registry_host }}/ca.crt"
     dest: /etc/containerd/certs.d/{{ trusted_registry_host }}/hosts.toml
     mode: "0644"
+  notify: restart containerd
 
 - name: Record kubelet cgroup driver choice
   ansible.builtin.copy:
     content: |
-      KUBELET_EXTRA_ARGS=--cgroup-driver={{ kubelet_cgroup_driver | default("systemd") }}
+      KUBELET_EXTRA_ARGS=--cgroup-driver={{ kubelet_cgroup_driver }}
     dest: /etc/default/kubelet
     mode: "0644"
+  notify: restart kubelet
+
+- name: Flush Kubernetes service handlers
+  ansible.builtin.meta: flush_handlers
+
+- name: Validate containerd configuration renders
+  ansible.builtin.command: containerd config dump
+  changed_when: false
+
+- name: Validate containerd is enabled
+  ansible.builtin.command: systemctl is-enabled containerd
+  changed_when: false
+
+- name: Validate containerd is active
+  ansible.builtin.command: systemctl is-active containerd
+  changed_when: false
+
+- name: Validate kubelet is enabled
+  ansible.builtin.command: systemctl is-enabled kubelet
+  changed_when: false
+
+- name: Validate kubelet is active
+  ansible.builtin.command: systemctl is-active kubelet
+  changed_when: false

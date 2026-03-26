@@ -17,13 +17,19 @@
 
 - name: Install internal CA root certificate placeholder
   ansible.builtin.copy:
-    content: |
-      -----BEGIN CERTIFICATE-----
-      PUBLIC-EXAMPLE-ONLY
-      -----END CERTIFICATE-----
+    content: "{{ trusted_ca_placeholder_pem }}"
     dest: "{{ trusted_ca_root_path }}"
     mode: "0644"
+  notify: refresh ca trust
 
-- name: Refresh trust store
-  ansible.builtin.command: update-ca-certificates
-  changed_when: true
+- name: Verify trust root placeholder is present
+  ansible.builtin.stat:
+    path: "{{ trusted_ca_root_path }}"
+  register: trust_root_file
+
+- name: Assert trust root placeholder exists
+  ansible.builtin.assert:
+    that:
+      - trust_root_file.stat.exists
+      - trust_root_file.stat.size > 0
+    fail_msg: "The trust root placeholder was not rendered."

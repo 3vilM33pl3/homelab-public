@@ -1,18 +1,17 @@
 ---
-- name: Prepare Kubernetes node baselines
-  hosts: baremetal
+- name: Prepare edge hosts
+  hosts: edge_hosts
   become: yes
   handlers:
     - name: refresh ca trust
       ansible.builtin.command: update-ca-certificates
       changed_when: true
   pre_tasks:
-    - name: Assert baremetal nodes are Debian-family systems
+    - name: Assert edge hosts are Debian-family systems
       ansible.builtin.assert:
         that:
           - ansible_os_family in supported_os_families
-          - inventory_hostname not in groups.get("edge_hosts", [])
-        fail_msg: "Baremetal bootstrap expects Debian-family cluster nodes only."
+        fail_msg: "The public example supports Debian-family edge hosts only."
   tasks:
     - import_tasks: tasks/base-host.yml
       tags: [base, security]
