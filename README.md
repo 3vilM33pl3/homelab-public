@@ -1,14 +1,14 @@
 # Public Homelab Reference
 
-This repository is a sanitized, public-facing version of a private homelab. It is meant to be a credible reference example: small enough to read quickly, but disciplined enough to demonstrate safe operating habits.
+This repository is a sanitized, public-facing version of my private homelab. It is meant to be a credible reference example: small enough to read quickly, but disciplined enough to demonstrate safe operating habits.
 
 ## What Stays Visible
 
 - Ansible for host provisioning and edge-service bootstrap
 - OpenTofu for Kubernetes resources and shared infrastructure
-- a dedicated internal certificate authority
+- A dedicated internal certificate authority
 - WireGuard-based remote access
-- object storage, observability, and backups as first-class infrastructure
+- Object storage, observability, and backups as first-class infrastructure
 
 ## What Is Intentionally Removed
 
