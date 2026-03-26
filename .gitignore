@@ -3,6 +3,3 @@ __pycache__/
 *.swp
 *.swo
 *~
-
-# Generated render output
-docs/architecture/*.svg
